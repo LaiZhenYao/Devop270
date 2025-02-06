@@ -50,6 +50,15 @@
     transition: opacity 1s, transform 1s;
     pointer-events: none; /* Prevents interaction with the +1 element */
   }
+  .game-over {
+    position: absolute;
+    top: 50%;
+    width: 100%;
+    text-align: center;
+    font-size: 24px;
+    color: red;
+    transform: translateY(-50%);
+  }
 </style>
 </head>
 <body>
@@ -59,8 +68,9 @@
 </div>
 <script>
   let isJumping = false;
+  let gameOver = false;
   document.addEventListener('keydown', function(event) {
-    if (event.code === 'Space' && !isJumping) {
+    if (event.code === 'Space' && !isJumping && !gameOver) {
       jump();
     }
   });
@@ -72,7 +82,7 @@
     setTimeout(() => {
       apple.style.bottom = '0';
       isJumping = false;
-      checkCollision();
+      setTimeout(checkCollision, 200); // Wait for apple to land before checking
     }, 500);
   }
 
@@ -96,9 +106,20 @@
   function checkCollision() {
     const appleRect = document.getElementById('apple').getBoundingClientRect();
     const obstacleRect = document.getElementById('obstacle').getBoundingClientRect();
-    if (appleRect.right > obstacleRect.left && appleRect.left < obstacleRect.right && appleRect.bottom > obstacleRect.top) {
+    if (appleRect.bottom > obstacleRect.top && appleRect.right > obstacleRect.left && appleRect.left < obstacleRect.right) {
+      gameOver = true;
+      displayGameOver();
+    } else {
       showPlusOne();
     }
+  }
+
+  function displayGameOver() {
+    const gameOverText = document.createElement('div');
+    gameOverText.textContent = 'Game Over - Apple Dead';
+    gameOverText.className = 'game-over';
+    document.getElementById('gameArea').appendChild(gameOverText);
+    document.getElementById('obstacle').style.animationPlayState = 'paused';
   }
 </script>
 </body>
