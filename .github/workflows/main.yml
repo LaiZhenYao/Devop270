@@ -51,8 +51,6 @@ jobs:
   deploy:
     needs: build-and-test
     runs-on: ubuntu-latest
-    if: needs.build-and-test.outputs.requirements_exists == 'true'
-
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
@@ -62,11 +60,22 @@ jobs:
       with:
         python-version: '3.9'
 
-    - name: Install dependencies (for deployment)
+    - name: Check if requirements.txt exists (for deployment)
       run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
+        if [ ! -f requirements.txt ]; then
+          echo "NOTE: requirements.txt does not exist. Adjusting deployment process accordingly."
+        fi
+
+    - name: Install dependencies (conditional)
+      run: |
+        if [ -f requirements.txt ]; then
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+        else
+          echo "Skipping dependencies as no requirements.txt found."
+        fi
 
     - name: Deploy to production
       run: |
         echo "Deploying to production"
+        # Add deployment commands here
