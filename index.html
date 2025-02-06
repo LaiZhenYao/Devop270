@@ -38,10 +38,6 @@
     background-color: black;
     animation: moveObstacle 2s infinite linear;
   }
-  @keyframes moveObstacle {
-    from { right: -20px; }
-    to { right: 100%; }
-  }
   .plus-one {
     position: absolute;
     color: green;
@@ -69,6 +65,9 @@
 <script>
   let isJumping = false;
   let gameOver = false;
+  let speed = 2000; // Initial speed in milliseconds
+  let jumps = 0; // Count successful jumps to increase speed
+
   document.addEventListener('keydown', function(event) {
     if (event.code === 'Space' && !isJumping && !gameOver) {
       jump();
@@ -82,45 +81,4 @@
     setTimeout(() => {
       apple.style.bottom = '0';
       isJumping = false;
-      setTimeout(checkCollision, 200); // Wait for apple to land before checking
-    }, 500);
-  }
-
-  function showPlusOne() {
-    const plusOne = document.createElement('div');
-    plusOne.textContent = '+$1000';
-    plusOne.className = 'plus-one';
-    document.getElementById('gameArea').appendChild(plusOne);
-
-    const appleRect = document.getElementById('apple').getBoundingClientRect();
-    plusOne.style.left = `${appleRect.left}px`;
-    plusOne.style.top = `${appleRect.top - 20}px`;
-
-    plusOne.style.transform = 'translateY(-20px)';
-    setTimeout(() => {
-      plusOne.style.opacity = '0';
-      setTimeout(() => plusOne.remove(), 1000);
-    }, 1000);
-  }
-
-  function checkCollision() {
-    const appleRect = document.getElementById('apple').getBoundingClientRect();
-    const obstacleRect = document.getElementById('obstacle').getBoundingClientRect();
-    if (appleRect.bottom > obstacleRect.top && appleRect.right > obstacleRect.left && appleRect.left < obstacleRect.right) {
-      gameOver = true;
-      displayGameOver();
-    } else {
-      showPlusOne();
-    }
-  }
-
-  function displayGameOver() {
-    const gameOverText = document.createElement('div');
-    gameOverText.textContent = 'Game Over - Apple Dead';
-    gameOverText.className = 'game-over';
-    document.getElementById('gameArea').appendChild(gameOverText);
-    document.getElementById('obstacle').style.animationPlayState = 'paused';
-  }
-</script>
-</body>
-</html>
+      setTimeout(checkCollision, 200); // Wait
