@@ -21,6 +21,9 @@ jobs:
       with:
         python-version: '3.9'
 
+    - name: List files
+      run: ls -alh
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
@@ -51,6 +54,4 @@ jobs:
 
     - name: Deploy to production
       run: |
-        # Your deployment script or command
         echo "Deploying to production"
-
