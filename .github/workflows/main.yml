@@ -27,7 +27,8 @@ jobs:
     - name: Check if requirements.txt exists
       run: |
         if [ ! -f requirements.txt ]; then
-          echo "ERROR: requirements.txt does not exist."
+          echo "ERROR: requirements.txt does not exist in the root directory."
+          ls -alh # List all files to verify current directory contents
           exit 1
         fi
 
@@ -57,7 +58,8 @@ jobs:
     - name: Check if requirements.txt exists (for deployment)
       run: |
         if [ ! -f requirements.txt ]; then
-          echo "ERROR: requirements.txt does not exist."
+          echo "ERROR: requirements.txt does not exist in the root directory for deployment."
+          ls -alh # List all files to verify current directory contents
           exit 1
         fi
 
