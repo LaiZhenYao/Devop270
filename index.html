@@ -27,7 +27,7 @@
     position: absolute;
     bottom: 0;
     left: 50px;
-    transition: bottom 0.2s;
+    transition: bottom 0.5s;
   }
   #obstacle {
     width: 20px;
@@ -38,13 +38,17 @@
     background-color: black;
     animation: moveObstacle 2s infinite linear;
   }
+  @keyframes moveObstacle {
+    0% { right: -20px; }
+    100% { right: 100%; }
+  }
   .plus-one {
     position: absolute;
     color: green;
     font-size: 24px;
-    opacity: 1;
+    opacity: 0;
     transition: opacity 1s, transform 1s;
-    pointer-events: none; /* Prevents interaction with the +1 element */
+    pointer-events: none;
   }
   .game-over {
     position: absolute;
@@ -81,7 +85,7 @@
     setTimeout(() => {
       apple.style.bottom = '0';
       isJumping = false;
-      setTimeout(checkCollision, 200); // Wait for apple to land before checking
+      checkCollision(); // Check collision after jump
     }, 500);
   }
 
@@ -89,13 +93,13 @@
     const plusOne = document.createElement('div');
     plusOne.textContent = '+$1000';
     plusOne.className = 'plus-one';
+    plusOne.style.opacity = '1';
     document.getElementById('gameArea').appendChild(plusOne);
-
+    
     const appleRect = document.getElementById('apple').getBoundingClientRect();
     plusOne.style.left = `${appleRect.left}px`;
-    plusOne.style.top = `${appleRect.top - 20}px`;
+    plusOne.style.top = `${appleRect.top - 50}px`;
 
-    plusOne.style.transform = 'translateY(-20px)';
     setTimeout(() => {
       plusOne.style.opacity = '0';
       setTimeout(() => plusOne.remove(), 1000);
@@ -105,12 +109,13 @@
   function checkCollision() {
     const appleRect = document.getElementById('apple').getBoundingClientRect();
     const obstacleRect = document.getElementById('obstacle').getBoundingClientRect();
-    if (appleRect.bottom > obstacleRect.top && appleRect.right > obstacleRect.left && appleRect.left < obstacleRect.right) {
+    // Check if the apple is within the obstacle's horizontal bounds and above its bottom
+    if (!isJumping && appleRect.right > obstacleRect.left && appleRect.left < obstacleRect.right && appleRect.bottom <= obstacleRect.bottom) {
       gameOver = true;
       displayGameOver();
-    } else {
+    } else if (!gameOver && isJumping) {
       jumps++;
-      speed = Math.max(700, speed - 100); // Decrease time to increase speed, but not less than 700ms
+      speed = Math.max(700, speed - 100); // Decrease time to increase speed
       document.getElementById('obstacle').style.animationDuration = `${speed}ms`;
       showPlusOne();
     }
