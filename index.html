@@ -48,8 +48,8 @@
 
     // Position randomly around the apple
     const rect = apple.getBoundingClientRect();
-    plusOne.style.left = ${rect.left + Math.random() * rect.width}px;
-    plusOne.style.top = ${rect.top + Math.random() * rect.height}px;
+    plusOne.style.left = `${rect.left + Math.random() * rect.width}px`;
+    plusOne.style.top = `${rect.top + Math.random() * rect.height}px`;
 
     // Animate and remove after completion
     plusOne.style.transform = 'translateY(-20px)';
