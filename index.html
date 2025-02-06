@@ -24,6 +24,9 @@
   }
   #apple {
     width: 50px;
+    height: 50px;
+    background: url('apple.png') no-repeat center center;
+    background-size: cover;
     position: absolute;
     bottom: 0;
     left: 50px;
@@ -33,14 +36,13 @@
     width: 20px;
     height: 50px;
     position: absolute;
-    right: 0;
+    right: -20px;
     bottom: 0;
     background-color: black;
     animation: moveObstacle 2s infinite linear;
   }
   @keyframes moveObstacle {
-    0% { right: -20px; }
-    100% { right: 100%; }
+    to { right: 100%; }
   }
   .plus-one {
     position: absolute;
@@ -63,7 +65,7 @@
 </head>
 <body>
 <div id="gameArea">
-  <img id="apple" src="apple.png" alt="Apple">
+  <div id="apple"></div>
   <div id="obstacle"></div>
 </div>
 <script>
@@ -85,8 +87,8 @@
     setTimeout(() => {
       apple.style.bottom = '0';
       isJumping = false;
-      checkCollision(); // Check collision after jump
     }, 500);
+    setTimeout(checkCollision, 500); // Check collision shortly after landing
   }
 
   function showPlusOne() {
@@ -96,9 +98,9 @@
     plusOne.style.opacity = '1';
     document.getElementById('gameArea').appendChild(plusOne);
     
-    const appleRect = document.getElementById('apple').getBoundingClientRect();
-    plusOne.style.left = `${appleRect.left}px`;
-    plusOne.style.top = `${appleRect.top - 50}px`;
+    const apple = document.getElementById('apple');
+    plusOne.style.left = `${apple.offsetLeft}px`;
+    plusOne.style.top = `${apple.offsetTop - 50}px`;
 
     setTimeout(() => {
       plusOne.style.opacity = '0';
@@ -107,17 +109,19 @@
   }
 
   function checkCollision() {
-    const appleRect = document.getElementById('apple').getBoundingClientRect();
-    const obstacleRect = document.getElementById('obstacle').getBoundingClientRect();
-    // Check if the apple is within the obstacle's horizontal bounds and above its bottom
-    if (!isJumping && appleRect.right > obstacleRect.left && appleRect.left < obstacleRect.right && appleRect.bottom <= obstacleRect.bottom) {
+    const apple = document.getElementById('apple');
+    const obstacle = document.getElementById('obstacle');
+    const appleRect = apple.getBoundingClientRect();
+    const obstacleRect = obstacle.getBoundingClientRect();
+    // Check if the apple is within the obstacle's horizontal bounds and collides
+    if (appleRect.right > obstacleRect.left && appleRect.left < obstacleRect.right && appleRect.bottom > obstacleRect.top) {
       gameOver = true;
       displayGameOver();
     } else if (!gameOver && isJumping) {
-      jumps++;
-      speed = Math.max(700, speed - 100); // Decrease time to increase speed
-      document.getElementById('obstacle').style.animationDuration = `${speed}ms`;
+      // If no collision and apple is in air, show +$1000
       showPlusOne();
+      speed = Math.max(700, speed - 50); // Decrease time to increase speed
+      obstacle.style.animationDuration = `${speed}ms`;
     }
   }
 
