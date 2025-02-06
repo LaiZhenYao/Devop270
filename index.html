@@ -48,8 +48,8 @@
     position: absolute;
     color: green;
     font-size: 24px;
-    opacity: 0;
-    transition: opacity 1s, transform 1s;
+    opacity: 1;
+    transition: all 1s ease-out;
     pointer-events: none;
   }
   .game-over {
@@ -72,8 +72,8 @@
   let isJumping = false;
   let gameOver = false;
   let speed = 2000; // Initial speed in milliseconds
-  let jumps = 0; // Count successful jumps to increase speed
-  
+  let canScore = true; // Flag to track if we can score
+
   document.addEventListener('keydown', function(event) {
     if (event.code === 'Space' && !isJumping && !gameOver) {
       jump();
@@ -82,24 +82,31 @@
 
   function jump() {
     const apple = document.getElementById('apple');
-    const obstacle = document.getElementById('obstacle');
     isJumping = true;
+    canScore = true; // Reset scoring flag on each jump
     apple.style.bottom = '100px';
 
-    // Check if obstacle is near the apple for successful jump
-    setTimeout(() => {
-      const obstacleRect = obstacle.getBoundingClientRect();
-      const appleRect = apple.getBoundingClientRect();
-      
-      // If apple successfully jumps over obstacle
-      if (obstacleRect.left < appleRect.right && obstacleRect.right > appleRect.left) {
-        showPlusOne();
+    // Start checking for successful jump
+    const checkJumpInterval = setInterval(() => {
+      if (canScore) {
+        const obstacle = document.getElementById('obstacle');
+        const obstacleRect = obstacle.getBoundingClientRect();
+        const appleRect = apple.getBoundingClientRect();
+        
+        // If apple is above and crossing the obstacle
+        if (obstacleRect.left < appleRect.right && 
+            obstacleRect.right > appleRect.left && 
+            appleRect.bottom < obstacleRect.top) {
+          showPlusOne();
+          canScore = false; // Prevent multiple scores for same jump
+        }
       }
-    }, 250);
+    }, 50);
 
     setTimeout(() => {
       apple.style.bottom = '0';
       isJumping = false;
+      clearInterval(checkJumpInterval);
     }, 500);
   }
 
@@ -107,7 +114,6 @@
     const plusOne = document.createElement('div');
     plusOne.textContent = '+$1000';
     plusOne.className = 'plus-one';
-    plusOne.style.opacity = '1';
     document.getElementById('gameArea').appendChild(plusOne);
     
     const apple = document.getElementById('apple');
@@ -115,14 +121,19 @@
     plusOne.style.top = `${apple.offsetTop - 50}px`;
     
     // Animate the +$1000 floating up and fading out
-    setTimeout(() => {
+    requestAnimationFrame(() => {
       plusOne.style.transform = 'translateY(-30px)';
       plusOne.style.opacity = '0';
-      setTimeout(() => plusOne.remove(), 1000);
-    }, 0);
+    });
+    
+    setTimeout(() => {
+      plusOne.remove();
+    }, 1000);
   }
 
   function checkCollision() {
+    if (gameOver) return;
+    
     const apple = document.getElementById('apple');
     const obstacle = document.getElementById('obstacle');
     const appleRect = apple.getBoundingClientRect();
