@@ -9,9 +9,15 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    flex-direction: column; /* Aligns children vertically */
     height: 100vh;
     margin: 0;
     background-color: white;
+  }
+  #title {
+    margin-bottom: 20px; /* Space between title and image */
+    font-size: 24px;
+    color: black;
   }
   #apple {
     width: 300px;
@@ -29,6 +35,7 @@
 </style>
 </head>
 <body>
+<div id="title">How fast Apple earn money</div>
 <img id="apple" src="apple.png" alt="Apple" onclick="jump()">
 <script>
   function jump() {
