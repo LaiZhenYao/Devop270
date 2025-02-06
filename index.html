@@ -81,4 +81,48 @@
     setTimeout(() => {
       apple.style.bottom = '0';
       isJumping = false;
-      setTimeout(checkCollision, 200); // Wait
+      setTimeout(checkCollision, 200); // Wait for apple to land before checking
+    }, 500);
+  }
+
+  function showPlusOne() {
+    const plusOne = document.createElement('div');
+    plusOne.textContent = '+$1000';
+    plusOne.className = 'plus-one';
+    document.getElementById('gameArea').appendChild(plusOne);
+
+    const appleRect = document.getElementById('apple').getBoundingClientRect();
+    plusOne.style.left = `${appleRect.left}px`;
+    plusOne.style.top = `${appleRect.top - 20}px`;
+
+    plusOne.style.transform = 'translateY(-20px)';
+    setTimeout(() => {
+      plusOne.style.opacity = '0';
+      setTimeout(() => plusOne.remove(), 1000);
+    }, 1000);
+  }
+
+  function checkCollision() {
+    const appleRect = document.getElementById('apple').getBoundingClientRect();
+    const obstacleRect = document.getElementById('obstacle').getBoundingClientRect();
+    if (appleRect.bottom > obstacleRect.top && appleRect.right > obstacleRect.left && appleRect.left < obstacleRect.right) {
+      gameOver = true;
+      displayGameOver();
+    } else {
+      jumps++;
+      speed = Math.max(700, speed - 100); // Decrease time to increase speed, but not less than 700ms
+      document.getElementById('obstacle').style.animationDuration = `${speed}ms`;
+      showPlusOne();
+    }
+  }
+
+  function displayGameOver() {
+    const gameOverText = document.createElement('div');
+    gameOverText.textContent = 'Game Over - Apple Dead';
+    gameOverText.className = 'game-over';
+    document.getElementById('gameArea').appendChild(gameOverText);
+    document.getElementById('obstacle').style.animationPlayState = 'paused';
+  }
+</script>
+</body>
+</html>
