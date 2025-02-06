@@ -30,7 +30,7 @@
     position: absolute;
     bottom: 0;
     left: 50px;
-    transition: bottom 0.5s;
+    transition: bottom 0.3s; /* Faster jump animation */
   }
   #obstacle {
     width: 20px;
@@ -67,6 +67,23 @@
     right: 10px;
     font-size: 18px;
   }
+  #restartButton {
+    position: absolute;
+    left: 50%;
+    top: 60%;
+    transform: translateX(-50%);
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    display: none;
+  }
+  #restartButton:hover {
+    background-color: #45a049;
+  }
 </style>
 </head>
 <body>
@@ -74,6 +91,7 @@
   <div id="apple"></div>
   <div id="obstacle"></div>
   <div id="score">Speed: 1x</div>
+  <button id="restartButton">Restart Game</button>
 </div>
 <script>
   let isJumping = false;
@@ -81,18 +99,23 @@
   let speed = 2000; // Initial speed in milliseconds
   let canScore = true; // Flag to track if we can score
   let speedMultiplier = 1;
+  let isOnGround = true;
   const speedDisplay = document.getElementById('score');
+  const restartButton = document.getElementById('restartButton');
 
   document.addEventListener('keydown', function(event) {
-    if (event.code === 'Space' && !isJumping && !gameOver) {
+    if (event.code === 'Space' && !isJumping && !gameOver && isOnGround) {
       jump();
     }
   });
 
+  restartButton.addEventListener('click', restartGame);
+
   function jump() {
     const apple = document.getElementById('apple');
     isJumping = true;
-    canScore = true; // Reset scoring flag on each jump
+    isOnGround = false;
+    canScore = true;
     apple.style.bottom = '100px';
 
     // Start checking for successful jump
@@ -102,22 +125,25 @@
         const obstacleRect = obstacle.getBoundingClientRect();
         const appleRect = apple.getBoundingClientRect();
         
-        // If apple is above and crossing the obstacle
         if (obstacleRect.left < appleRect.right && 
             obstacleRect.right > appleRect.left && 
             appleRect.bottom < obstacleRect.top) {
           showPlusOne();
           increaseSpeed();
-          canScore = false; // Prevent multiple scores for same jump
+          canScore = false;
         }
       }
     }, 50);
 
+    // Faster jump duration
     setTimeout(() => {
       apple.style.bottom = '0';
       isJumping = false;
+      setTimeout(() => {
+        isOnGround = true;
+      }, 50); // Small delay to ensure landing is complete
       clearInterval(checkJumpInterval);
-    }, 500);
+    }, 300); // Reduced from 500ms to 300ms
   }
 
   function showPlusOne() {
@@ -130,7 +156,6 @@
     plusOne.style.left = `${apple.offsetLeft}px`;
     plusOne.style.top = `${apple.offsetTop - 50}px`;
     
-    // Animate the +$1000 floating up and fading out
     requestAnimationFrame(() => {
       plusOne.style.transform = 'translateY(-30px)';
       plusOne.style.opacity = '0';
@@ -142,8 +167,8 @@
   }
 
   function increaseSpeed() {
-    speed = Math.max(500, speed - 100); // Decrease time (increase speed) with a minimum of 500ms
-    speedMultiplier = (2000 / speed).toFixed(1); // Calculate speed multiplier
+    speed = Math.max(500, speed - 100);
+    speedMultiplier = (2000 / speed).toFixed(1);
     const obstacle = document.getElementById('obstacle');
     obstacle.style.animationDuration = `${speed}ms`;
     speedDisplay.textContent = `Speed: ${speedMultiplier}x`;
@@ -172,6 +197,34 @@
     gameOverText.className = 'game-over';
     document.getElementById('gameArea').appendChild(gameOverText);
     document.getElementById('obstacle').style.animationPlayState = 'paused';
+    restartButton.style.display = 'block';
+  }
+
+  function restartGame() {
+    // Remove game over text
+    const gameOverText = document.querySelector('.game-over');
+    if (gameOverText) {
+      gameOverText.remove();
+    }
+
+    // Reset variables
+    gameOver = false;
+    speed = 2000;
+    speedMultiplier = 1;
+    isJumping = false;
+    canScore = true;
+    isOnGround = true;
+
+    // Reset obstacle
+    const obstacle = document.getElementById('obstacle');
+    obstacle.style.animationDuration = `${speed}ms`;
+    obstacle.style.animationPlayState = 'running';
+
+    // Reset speed display
+    speedDisplay.textContent = 'Speed: 1x';
+
+    // Hide restart button
+    restartButton.style.display = 'none';
   }
 
   // Check for collisions continuously
