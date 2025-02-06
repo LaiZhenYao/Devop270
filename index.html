@@ -3,232 +3,61 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Jumping Apple Game</title>
+<title>Jumping Apple</title>
 <style>
-  body, html {
-    width: 100%;
-    height: 100%;
-    margin: 0;
-    overflow: hidden;
-    background-color: white;
+  body {
     display: flex;
     justify-content: center;
     align-items: center;
-  }
-  #gameArea {
-    position: relative;
-    width: 600px;
-    height: 200px;
-    border: 1px solid black;
-    overflow: hidden;
+    height: 100vh;
+    margin: 0;
+    background-color: white;
   }
   #apple {
-    width: 50px;
-    height: 50px;
-    background: url('apple.png') no-repeat center center;
-    background-size: cover;
-    position: absolute;
-    bottom: 0;
-    left: 50px;
-    transition: bottom 0.3s; /* Faster jump animation */
-  }
-  #obstacle {
-    width: 20px;
-    height: 50px;
-    position: absolute;
-    right: -20px;
-    bottom: 0;
-    background-color: black;
-    animation: moveObstacle 2s infinite linear;
-  }
-  @keyframes moveObstacle {
-    to { right: 100%; }
+    width: 300px;
+    transition: transform 0.2s;
+    cursor: pointer;
   }
   .plus-one {
     position: absolute;
     color: green;
     font-size: 24px;
     opacity: 1;
-    transition: all 1s ease-out;
-    pointer-events: none;
-  }
-  .game-over {
-    position: absolute;
-    top: 50%;
-    width: 100%;
-    text-align: center;
-    font-size: 24px;
-    color: red;
-    transform: translateY(-50%);
-  }
-  #score {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    font-size: 18px;
-  }
-  #restartButton {
-    position: absolute;
-    left: 50%;
-    top: 60%;
-    transform: translateX(-50%);
-    padding: 10px 20px;
-    font-size: 16px;
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    display: none;
-  }
-  #restartButton:hover {
-    background-color: #45a049;
+    transition: opacity 1s, transform 1s;
+    pointer-events: none; /* Prevents interaction with the +1 element */
   }
 </style>
 </head>
 <body>
-<div id="gameArea">
-  <div id="apple"></div>
-  <div id="obstacle"></div>
-  <div id="score">Speed: 1x</div>
-  <button id="restartButton">Restart Game</button>
-</div>
+<img id="apple" src="apple.png" alt="Apple" onclick="jump()">
 <script>
-  let isJumping = false;
-  let gameOver = false;
-  let speed = 2000; // Initial speed in milliseconds
-  let canScore = true; // Flag to track if we can score
-  let speedMultiplier = 1;
-  let isOnGround = true;
-  const speedDisplay = document.getElementById('score');
-  const restartButton = document.getElementById('restartButton');
-
-  document.addEventListener('keydown', function(event) {
-    if (event.code === 'Space' && !isJumping && !gameOver && isOnGround) {
-      jump();
-    }
-  });
-
-  restartButton.addEventListener('click', restartGame);
-
   function jump() {
     const apple = document.getElementById('apple');
-    isJumping = true;
-    isOnGround = false;
-    canScore = true;
-    apple.style.bottom = '100px';
-
-    // Start checking for successful jump
-    const checkJumpInterval = setInterval(() => {
-      if (canScore) {
-        const obstacle = document.getElementById('obstacle');
-        const obstacleRect = obstacle.getBoundingClientRect();
-        const appleRect = apple.getBoundingClientRect();
-        
-        if (obstacleRect.left < appleRect.right && 
-            obstacleRect.right > appleRect.left && 
-            appleRect.bottom < obstacleRect.top) {
-          showPlusOne();
-          increaseSpeed();
-          canScore = false;
-        }
-      }
-    }, 50);
-
-    // Faster jump duration
+    apple.style.transform = 'translateY(-100px)';
     setTimeout(() => {
-      apple.style.bottom = '0';
-      isJumping = false;
-      setTimeout(() => {
-        isOnGround = true;
-      }, 50); // Small delay to ensure landing is complete
-      clearInterval(checkJumpInterval);
-    }, 300); // Reduced from 500ms to 300ms
+      apple.style.transform = 'translateY(0)';
+    }, 200);
+    showPlusOne();
   }
 
   function showPlusOne() {
     const plusOne = document.createElement('div');
     plusOne.textContent = '+$1000';
     plusOne.className = 'plus-one';
-    document.getElementById('gameArea').appendChild(plusOne);
-    
-    const apple = document.getElementById('apple');
-    plusOne.style.left = `${apple.offsetLeft}px`;
-    plusOne.style.top = `${apple.offsetTop - 50}px`;
-    
-    requestAnimationFrame(() => {
-      plusOne.style.transform = 'translateY(-30px)';
-      plusOne.style.opacity = '0';
-    });
-    
+    document.body.appendChild(plusOne);
+
+    // Position randomly around the apple
+    const rect = apple.getBoundingClientRect();
+    plusOne.style.left = ${rect.left + Math.random() * rect.width}px;
+    plusOne.style.top = ${rect.top + Math.random() * rect.height}px;
+
+    // Animate and remove after completion
+    plusOne.style.transform = 'translateY(-20px)';
     setTimeout(() => {
-      plusOne.remove();
+      plusOne.style.opacity = '0';
+      setTimeout(() => plusOne.remove(), 1000); // Remove after fade out
     }, 1000);
   }
-
-  function increaseSpeed() {
-    speed = Math.max(500, speed - 100);
-    speedMultiplier = (2000 / speed).toFixed(1);
-    const obstacle = document.getElementById('obstacle');
-    obstacle.style.animationDuration = `${speed}ms`;
-    speedDisplay.textContent = `Speed: ${speedMultiplier}x`;
-  }
-
-  function checkCollision() {
-    if (gameOver) return;
-    
-    const apple = document.getElementById('apple');
-    const obstacle = document.getElementById('obstacle');
-    const appleRect = apple.getBoundingClientRect();
-    const obstacleRect = obstacle.getBoundingClientRect();
-
-    if (appleRect.right > obstacleRect.left && 
-        appleRect.left < obstacleRect.right && 
-        appleRect.bottom > obstacleRect.top && 
-        !isJumping) {
-      gameOver = true;
-      displayGameOver();
-    }
-  }
-
-  function displayGameOver() {
-    const gameOverText = document.createElement('div');
-    gameOverText.textContent = `Game Over - Apple Dead\nFinal Speed: ${speedMultiplier}x`;
-    gameOverText.className = 'game-over';
-    document.getElementById('gameArea').appendChild(gameOverText);
-    document.getElementById('obstacle').style.animationPlayState = 'paused';
-    restartButton.style.display = 'block';
-  }
-
-  function restartGame() {
-    // Remove game over text
-    const gameOverText = document.querySelector('.game-over');
-    if (gameOverText) {
-      gameOverText.remove();
-    }
-
-    // Reset variables
-    gameOver = false;
-    speed = 2000;
-    speedMultiplier = 1;
-    isJumping = false;
-    canScore = true;
-    isOnGround = true;
-
-    // Reset obstacle
-    const obstacle = document.getElementById('obstacle');
-    obstacle.style.animationDuration = `${speed}ms`;
-    obstacle.style.animationPlayState = 'running';
-
-    // Reset speed display
-    speedDisplay.textContent = 'Speed: 1x';
-
-    // Hide restart button
-    restartButton.style.display = 'none';
-  }
-
-  // Check for collisions continuously
-  setInterval(checkCollision, 10);
 </script>
 </body>
 </html>
