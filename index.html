@@ -18,6 +18,14 @@
     transition: transform 0.2s;
     cursor: pointer;
   }
+  .plus-one {
+    position: absolute;
+    color: green;
+    font-size: 24px;
+    opacity: 1;
+    transition: opacity 1s, transform 1s;
+    pointer-events: none; /* Prevents interaction with the +1 element */
+  }
 </style>
 </head>
 <body>
@@ -29,6 +37,26 @@
     setTimeout(() => {
       apple.style.transform = 'translateY(0)';
     }, 200);
+    showPlusOne();
+  }
+
+  function showPlusOne() {
+    const plusOne = document.createElement('div');
+    plusOne.textContent = '+1';
+    plusOne.className = 'plus-one';
+    document.body.appendChild(plusOne);
+
+    // Position randomly around the apple
+    const rect = apple.getBoundingClientRect();
+    plusOne.style.left = `${rect.left + Math.random() * rect.width}px`;
+    plusOne.style.top = `${rect.top + Math.random() * rect.height}px`;
+
+    // Animate and remove after completion
+    plusOne.style.transform = 'translateY(-20px)';
+    setTimeout(() => {
+      plusOne.style.opacity = '0';
+      setTimeout(() => plusOne.remove(), 1000); // Remove after fade out
+    }, 1000);
   }
 </script>
 </body>
