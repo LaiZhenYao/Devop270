@@ -3,20 +3,44 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Jumping Apple</title>
+<title>Jumping Apple Game</title>
 <style>
-  body {
+  body, html {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+    background-color: white;
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
-    margin: 0;
-    background-color: white;
+  }
+  #gameArea {
+    position: relative;
+    width: 600px;
+    height: 200px;
+    border: 1px solid black;
+    overflow: hidden;
   }
   #apple {
-    width: 300px;
-    transition: transform 0.2s;
-    cursor: pointer;
+    width: 50px;
+    position: absolute;
+    bottom: 0;
+    left: 50px;
+    transition: bottom 0.2s;
+  }
+  #obstacle {
+    width: 20px;
+    height: 50px;
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    background-color: black;
+    animation: moveObstacle 2s infinite linear;
+  }
+  @keyframes moveObstacle {
+    from { right: -20px; }
+    to { right: 100%; }
   }
   .plus-one {
     position: absolute;
@@ -29,34 +53,52 @@
 </style>
 </head>
 <body>
-<img id="apple" src="apple.png" alt="Apple" onclick="jump()">
+<div id="gameArea">
+  <img id="apple" src="apple.png" alt="Apple">
+  <div id="obstacle"></div>
+</div>
 <script>
+  let isJumping = false;
+  document.addEventListener('keydown', function(event) {
+    if (event.code === 'Space' && !isJumping) {
+      jump();
+    }
+  });
+
   function jump() {
     const apple = document.getElementById('apple');
-    apple.style.transform = 'translateY(-100px)';
+    isJumping = true;
+    apple.style.bottom = '100px';
     setTimeout(() => {
-      apple.style.transform = 'translateY(0)';
-    }, 200);
-    showPlusOne();
+      apple.style.bottom = '0';
+      isJumping = false;
+      checkCollision();
+    }, 500);
   }
 
   function showPlusOne() {
     const plusOne = document.createElement('div');
     plusOne.textContent = '+$1000';
     plusOne.className = 'plus-one';
-    document.body.appendChild(plusOne);
+    document.getElementById('gameArea').appendChild(plusOne);
 
-    // Position randomly around the apple
-    const rect = apple.getBoundingClientRect();
-    plusOne.style.left = `${rect.left + Math.random() * rect.width}px`;
-    plusOne.style.top = `${rect.top + Math.random() * rect.height}px`;
+    const appleRect = document.getElementById('apple').getBoundingClientRect();
+    plusOne.style.left = `${appleRect.left}px`;
+    plusOne.style.top = `${appleRect.top - 20}px`;
 
-    // Animate and remove after completion
     plusOne.style.transform = 'translateY(-20px)';
     setTimeout(() => {
       plusOne.style.opacity = '0';
-      setTimeout(() => plusOne.remove(), 1000); // Remove after fade out
+      setTimeout(() => plusOne.remove(), 1000);
     }, 1000);
+  }
+
+  function checkCollision() {
+    const appleRect = document.getElementById('apple').getBoundingClientRect();
+    const obstacleRect = document.getElementById('obstacle').getBoundingClientRect();
+    if (appleRect.right > obstacleRect.left && appleRect.left < obstacleRect.right && appleRect.bottom > obstacleRect.top) {
+      showPlusOne();
+    }
   }
 </script>
 </body>
