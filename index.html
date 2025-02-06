@@ -25,8 +25,8 @@
   #apple {
     width: 50px;
     height: 50px;
-    background-color: red;
-    border-radius: 50%;
+    background: url('apple.png') no-repeat center center;
+    background-size: cover;
     position: absolute;
     bottom: 0;
     left: 50px;
@@ -42,48 +42,24 @@
     animation: moveObstacle 2s infinite linear;
   }
   @keyframes moveObstacle {
-    from { right: -20px; }
     to { right: 100%; }
   }
   .plus-one {
     position: absolute;
     color: green;
     font-size: 24px;
-    font-weight: bold;
     opacity: 0;
-    animation: floatUp 1s ease-out;
+    transition: opacity 1s, transform 1s;
     pointer-events: none;
-  }
-  @keyframes floatUp {
-    0% {
-      opacity: 1;
-      transform: translateY(0);
-    }
-    100% {
-      opacity: 0;
-      transform: translateY(-50px);
-    }
   }
   .game-over {
     position: absolute;
     top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 32px;
-    color: red;
-    font-weight: bold;
+    width: 100%;
     text-align: center;
-    background: rgba(255, 255, 255, 0.9);
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-  }
-  #score {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    font-size: 20px;
-    font-weight: bold;
+    font-size: 24px;
+    color: red;
+    transform: translateY(-50%);
   }
 </style>
 </head>
@@ -91,14 +67,12 @@
 <div id="gameArea">
   <div id="apple"></div>
   <div id="obstacle"></div>
-  <div id="score">Score: $0</div>
 </div>
 <script>
   let isJumping = false;
   let gameOver = false;
   let speed = 2000; // Initial speed in milliseconds
-  let score = 0;
-  const scoreDisplay = document.getElementById('score');
+  let jumps = 0; // Count successful jumps to increase speed
   
   document.addEventListener('keydown', function(event) {
     if (event.code === 'Space' && !isJumping && !gameOver) {
@@ -108,31 +82,24 @@
 
   function jump() {
     const apple = document.getElementById('apple');
+    const obstacle = document.getElementById('obstacle');
     isJumping = true;
     apple.style.bottom = '100px';
-    
-    // Start checking for successful jump
-    const obstacle = document.getElementById('obstacle');
-    const obstacleRect = obstacle.getBoundingClientRect();
-    const appleLeft = apple.offsetLeft;
-    
-    // If the obstacle is approaching the apple's position
-    if (obstacleRect.right > appleLeft && obstacleRect.left < (appleLeft + apple.offsetWidth)) {
-      // Successful jump
-      setTimeout(() => {
-        if (!gameOver) {
-          showPlusOne();
-          score += 1000;
-          scoreDisplay.textContent = `Score: $${score}`;
-          increaseSpeed();
-        }
-      }, 250);
-    }
+
+    // Check if obstacle is near the apple for successful jump
+    setTimeout(() => {
+      const obstacleRect = obstacle.getBoundingClientRect();
+      const appleRect = apple.getBoundingClientRect();
+      
+      // If apple successfully jumps over obstacle
+      if (obstacleRect.left < appleRect.right && obstacleRect.right > appleRect.left) {
+        showPlusOne();
+      }
+    }, 250);
 
     setTimeout(() => {
       apple.style.bottom = '0';
       isJumping = false;
-      checkCollision();
     }, 500);
   }
 
@@ -140,18 +107,22 @@
     const plusOne = document.createElement('div');
     plusOne.textContent = '+$1000';
     plusOne.className = 'plus-one';
+    plusOne.style.opacity = '1';
+    document.getElementById('gameArea').appendChild(plusOne);
     
     const apple = document.getElementById('apple');
     plusOne.style.left = `${apple.offsetLeft}px`;
-    plusOne.style.top = `${apple.offsetTop}px`;
+    plusOne.style.top = `${apple.offsetTop - 50}px`;
     
-    document.getElementById('gameArea').appendChild(plusOne);
-    setTimeout(() => plusOne.remove(), 1000);
+    // Animate the +$1000 floating up and fading out
+    setTimeout(() => {
+      plusOne.style.transform = 'translateY(-30px)';
+      plusOne.style.opacity = '0';
+      setTimeout(() => plusOne.remove(), 1000);
+    }, 0);
   }
 
   function checkCollision() {
-    if (gameOver) return;
-    
     const apple = document.getElementById('apple');
     const obstacle = document.getElementById('obstacle');
     const appleRect = apple.getBoundingClientRect();
@@ -166,21 +137,15 @@
     }
   }
 
-  function increaseSpeed() {
-    speed = Math.max(700, speed - 50);
-    const obstacle = document.getElementById('obstacle');
-    obstacle.style.animationDuration = `${speed}ms`;
-  }
-
   function displayGameOver() {
     const gameOverText = document.createElement('div');
-    gameOverText.textContent = 'Game Over - Apple Dead!\nFinal Score: $' + score;
+    gameOverText.textContent = 'Game Over - Apple Dead';
     gameOverText.className = 'game-over';
     document.getElementById('gameArea').appendChild(gameOverText);
     document.getElementById('obstacle').style.animationPlayState = 'paused';
   }
 
-  // Set up continuous collision checking
+  // Check for collisions continuously
   setInterval(checkCollision, 10);
 </script>
 </body>
