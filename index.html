@@ -61,18 +61,27 @@
     color: red;
     transform: translateY(-50%);
   }
+  #score {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 18px;
+  }
 </style>
 </head>
 <body>
 <div id="gameArea">
   <div id="apple"></div>
   <div id="obstacle"></div>
+  <div id="score">Speed: 1x</div>
 </div>
 <script>
   let isJumping = false;
   let gameOver = false;
   let speed = 2000; // Initial speed in milliseconds
   let canScore = true; // Flag to track if we can score
+  let speedMultiplier = 1;
+  const speedDisplay = document.getElementById('score');
 
   document.addEventListener('keydown', function(event) {
     if (event.code === 'Space' && !isJumping && !gameOver) {
@@ -98,6 +107,7 @@
             obstacleRect.right > appleRect.left && 
             appleRect.bottom < obstacleRect.top) {
           showPlusOne();
+          increaseSpeed();
           canScore = false; // Prevent multiple scores for same jump
         }
       }
@@ -131,6 +141,14 @@
     }, 1000);
   }
 
+  function increaseSpeed() {
+    speed = Math.max(500, speed - 100); // Decrease time (increase speed) with a minimum of 500ms
+    speedMultiplier = (2000 / speed).toFixed(1); // Calculate speed multiplier
+    const obstacle = document.getElementById('obstacle');
+    obstacle.style.animationDuration = `${speed}ms`;
+    speedDisplay.textContent = `Speed: ${speedMultiplier}x`;
+  }
+
   function checkCollision() {
     if (gameOver) return;
     
@@ -150,7 +168,7 @@
 
   function displayGameOver() {
     const gameOverText = document.createElement('div');
-    gameOverText.textContent = 'Game Over - Apple Dead';
+    gameOverText.textContent = `Game Over - Apple Dead\nFinal Speed: ${speedMultiplier}x`;
     gameOverText.className = 'game-over';
     document.getElementById('gameArea').appendChild(gameOverText);
     document.getElementById('obstacle').style.animationPlayState = 'paused';
