@@ -9,18 +9,33 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    flex-direction: column; /* Aligns children vertically */
     height: 100vh;
     margin: 0;
-    background-color: #f4f4f4;
+    background-color: lightgray;
+  }
+  #title {
+    margin-bottom: 100px; /* Further increased space between title and image */
+    font-size: 24px;
+    color: black;
   }
   #apple {
-    width: 100px;
+    width: 300px;
     transition: transform 0.2s;
     cursor: pointer;
+  }
+  .plus-one {
+    position: absolute;
+    color: green;
+    font-size: 24px;
+    opacity: 1;
+    transition: opacity 1s, transform 1s;
+    pointer-events: none; /* Prevents interaction with the +1 element */
   }
 </style>
 </head>
 <body>
+<div id="title">How fast does Apple make money?</div>
 <img id="apple" src="apple.png" alt="Apple" onclick="jump()">
 <script>
   function jump() {
@@ -29,6 +44,26 @@
     setTimeout(() => {
       apple.style.transform = 'translateY(0)';
     }, 200);
+    showPlusOne();
+  }
+
+  function showPlusOne() {
+    const plusOne = document.createElement('div');
+    plusOne.textContent = '+$10000';
+    plusOne.className = 'plus-one';
+    document.body.appendChild(plusOne);
+
+    // Position randomly around the apple
+    const rect = apple.getBoundingClientRect();
+    plusOne.style.left = `${rect.left + Math.random() * rect.width}px`;
+    plusOne.style.top = `${rect.top + Math.random() * rect.height}px`;
+
+    // Animate and remove after completion
+    plusOne.style.transform = 'translateY(-20px)';
+    setTimeout(() => {
+      plusOne.style.opacity = '0';
+      setTimeout(() => plusOne.remove(), 1000); // Remove after fade out
+    }, 1000);
   }
 </script>
 </body>
